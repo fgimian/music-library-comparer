@@ -195,16 +195,119 @@ fn compare_tracks(
 fn main() {
     let mut spotify_mapping = build_mapping("My Spotify Library.csv").unwrap();
     let tidal_mapping = build_mapping("My TIDAL Library.csv").unwrap();
-    let qobuz_mapping = build_mapping("My Qobuz Library.csv").unwrap();
+    let mut qobuz_mapping = build_mapping("My Qobuz Library.csv").unwrap();
 
     for (spotify_isrc, hires_isrc) in [
-        ("859727497927", "859723464039"),
+        // Alexis Ffrench - Evolution
         ("886446990354", "886446990347"),
+        // Alexis Ffrench - Truth
+        ("886449668656", "886449839520"),
+        // Carly Pearce - Carly Pearce
+        ("843930050222", "843930050239"),
+        // Chris Tomlin - Chris Tomlin & Friends
+        ("602507408510", "602508788475"),
+        // Daniil Trifonov - Chopin Evocations
+        ("28947974741", "28947974765"),
+        // Danny Gokey - Sound Of Heaven
+        ("602465089790", "602465089806"),
+        // Freya Ridings - Freya Ridings
+        ("602577537288", "602577537318"),
+        // George Frideric Handel / Emma Kirkby - Handel: Messiah (Remastered 2014)
+        ("28947881650", "28947881674"),
+        // Housefires - How To Start A Housefire
+        ("602448696533", "602455166241"),
+        // Jeremy Camp - The Story's Not Over
+        ("602567427766", "602508465482"),
+        // Jeremy Camp - When You Speak
+        ("602508353871", "602507446925"),
+        // Jeremy Rosado - The Waiting Room
+        ("602478346743", "602478346750"),
+        // Joe Hisaishi - NOSTALGIA ～PIANO STORIES III～
+        ("602508731693", "602508731716"),
+        // Jonathan Traylor - Closer Than You Think
+        ("602445996179", "602445996186"),
+        // Jordan Davis - Bluebird Days
+        ("602455058966", "602455058935"),
+        // Jordan Davis - Buy Dirt
+        ("602438070404", "602438070411"),
+        // Jordan Davis - Jordan Davis
+        ("602508988004", "602508988011"),
+        // Kacey Musgraves - star-crossed
+        ("602438699216", "602438699223"),
+        // Kari Jobe - The Blessing (Live)
+        ("602557919509", "602507233655"),
+        // Kari Jobe - The Blessing
+        ("602577229503", "602508830488"),
+        // Kim Walker-Smith - Wild Heart (Live)
+        ("602557922066", "602507149062"),
+        // Lady A - Ocean
+        ("843930047079", "843930047574"),
+        // Lauren Alaina - Getting Good
+        ("602508742620", "602508742637"),
+        // Lights - Midnight Machines
+        ("93624921431", "93624921424"),
+        // Ludwig van Beethoven / Wiener Philharmoniker - Beethoven: Symphonies Nos. 5 & 7
+        ("28948637751", "28948638796"),
+        // Maddie & Tae - The Way It Feels
+        ("602508780288", "602508780295"),
+        // Maddie & Tae - Through The Madness Vol. 1
+        ("602445320400", "602445320417"),
+        // Mosaic MSC - This Is How I Thank The Lord
+        ("602438574841", "602438574865"),
+        // Ola Gjeilo - Ola Gjeilo
+        ("28947886914", "28947886938"),
+        // Pat Barrett - Shelter
+        ("602507447151", "602507447175"),
+        // Riley Clemmons - Godsend (Deluxe)
+        ("602438725328", "602438725342"),
+        // Runaway June - Blue Roses
+        ("4050538508703", "4050538508727"),
+        // Sean Curran - 1,000 Names
+        ("602438784820", "602438784844"),
+        // Tasha Layton - How Far
+        ("810539026620", "810539025272"),
+        // Tauren Wells - Let The Church Sing
+        ("602475821199", "602475821205"),
+        // TAYA - TAYA
+        ("602455038814", "602455046352"),
+        // The Belonging Co - Now (Live)
+        ("687398362660", "687398362684"),
+        // The Belonging Co - See The Light (Live)
+        ("687398362257", "687398362271"),
+        // The Belonging Co - TEN
+        ("850052903176", "850052903183"),
+        // VOUS Worship - Dying To Be Different (Live)
+        ("840468806208", "840468806192"),
+        // VOUS Worship - Future Glory (Live)
+        ("810116758876", "810116758869"),
+        // VOUS Worship - I Need Revival (Live)
+        ("7316470064712", "810116755813"),
+        // Within Temptation - Resist (Extended Deluxe)
+        ("602577347689", "602577347665"),
+        // Yiruma - The Rewritten Memories
+        ("602435607467", "602435607474"),
     ] {
         let index = spotify_mapping.albums.get_index_of(spotify_isrc).unwrap();
         spotify_mapping
             .albums
             .replace_index(index, hires_isrc.to_string())
+            .unwrap();
+    }
+
+    for (qobuz_isrc, tidal_isrc) in [
+        // Alma Deutscher - From My Book of Melodies
+        ("886447893517", "886447893500"),
+        // Arthur Rubinstein - Chopin: Nocturnes
+        ("886443706675", "884977564013"),
+        // HAUSER - Classic
+        ("886447884034", "886447884010"),
+        // Housefires - How To Start A Housefire
+        ("602448696595", "602455166241"),
+    ] {
+        let index = qobuz_mapping.albums.get_index_of(qobuz_isrc).unwrap();
+        qobuz_mapping
+            .albums
+            .replace_index(index, tidal_isrc.to_string())
             .unwrap();
     }
 
