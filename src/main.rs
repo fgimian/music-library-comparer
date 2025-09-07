@@ -62,42 +62,6 @@ fn compare_albums(
     tidal_albums: &IndexMap<String, Album>,
     qobuz_albums: &IndexMap<String, Album>,
 ) {
-    for (reference_albums, other_albums, reference_name, other_name) in [
-        (spotify_albums, tidal_albums, "Spotify", "TIDAL"),
-        (spotify_albums, qobuz_albums, "Spotify", "Qobuz"),
-    ] {
-        let mut reference_albums_iter = reference_albums.iter();
-        let mut current_reference_track = reference_albums_iter.next();
-
-        for (index, (other_isrc, album)) in other_albums.iter().enumerate() {
-            if !reference_albums.contains_key(other_isrc) {
-                continue;
-            }
-
-            while let Some((reference_isrc, _)) = current_reference_track
-                && !other_albums.contains_key(reference_isrc)
-            {
-                current_reference_track = reference_albums_iter.next();
-            }
-
-            let Some((reference_isrc, _)) = current_reference_track else {
-                break;
-            };
-
-            if other_isrc != reference_isrc {
-                println!(
-                    "— [❌ {other_name} / ✔️ {reference_name}] #{}: {} - {}",
-                    index + 1,
-                    album.artist,
-                    album.title
-                );
-                break;
-            }
-
-            current_reference_track = reference_albums_iter.next();
-        }
-    }
-
     let mut missing_albums = tidal_albums
         .iter()
         .filter(|(isrc, _)| !spotify_albums.contains_key(isrc.as_str()))
