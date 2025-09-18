@@ -71,6 +71,7 @@ impl PartialOrd for Track {
 
 #[derive(Debug)]
 pub struct Mappings {
+    pub artists: IndexMap<String, String>,
     pub albums: IndexMap<String, Album>,
     pub tracks: IndexMap<String, Track>,
     pub playlists: IndexMap<String, IndexMap<String, Track>>,

@@ -12,6 +12,7 @@ fn build_mapping(path: impl AsRef<Path>) -> Result<Mappings> {
     let library = File::open(path)?;
     let mut reader = Reader::from_reader(library);
 
+    let mut artists = IndexMap::new();
     let mut albums = IndexMap::new();
     let mut tracks = IndexMap::new();
     let mut playlists: IndexMap<String, IndexMap<String, Track>> = IndexMap::new();
@@ -20,7 +21,12 @@ fn build_mapping(path: impl AsRef<Path>) -> Result<Mappings> {
         let record: Record = result?;
         let isrc = record.isrc.trim_start_matches('0').to_uppercase();
 
-        if record.r#type == "Album" {
+        if record.r#type == "Artist" {
+            artists.insert(
+                record.track_name.to_lowercase().trim().to_string(),
+                record.track_name.trim().to_string(),
+            );
+        } else if record.r#type == "Album" {
             albums.insert(
                 isrc,
                 Album {
@@ -51,10 +57,50 @@ fn build_mapping(path: impl AsRef<Path>) -> Result<Mappings> {
     }
 
     Ok(Mappings {
+        artists,
         albums,
         tracks,
         playlists,
     })
+}
+
+fn compare_artists(
+    tidal_artists: &IndexMap<String, String>,
+    qobuz_artists: &IndexMap<String, String>,
+) {
+    let mut missing_artists = tidal_artists
+        .iter()
+        .filter(|(tidal_artist_lowercase, _)| {
+            !qobuz_artists.contains_key(tidal_artist_lowercase.as_str())
+                && !qobuz_artists.iter().any(|(qobuz_artist_lowercase, _)| {
+                    tidal_artist_lowercase.starts_with(qobuz_artist_lowercase)
+                })
+        })
+        .collect::<Vec<_>>();
+    missing_artists.sort_by(|a, b| a.1.cmp(b.1));
+
+    if !missing_artists.is_empty() {
+        for (_, artist) in missing_artists {
+            println!("— [➖ Qobuz / ➕ TIDAL] - {artist}");
+        }
+    }
+
+    let mut missing_artists = qobuz_artists
+        .iter()
+        .filter(|(qobuz_artist_lowercase, _)| {
+            !tidal_artists.contains_key(qobuz_artist_lowercase.as_str())
+                && !tidal_artists.iter().any(|(tidal_artist_lowercase, _)| {
+                    tidal_artist_lowercase.starts_with(qobuz_artist_lowercase.as_str())
+                })
+        })
+        .collect::<Vec<_>>();
+    missing_artists.sort_by(|a, b| a.1.cmp(b.1));
+
+    if !missing_artists.is_empty() {
+        for (_, artist) in missing_artists {
+            println!("— [➖ TIDAL / ➕ Qobuz] - {artist}");
+        }
+    }
 }
 
 fn compare_albums(tidal_albums: &IndexMap<String, Album>, qobuz_albums: &IndexMap<String, Album>) {
@@ -150,6 +196,9 @@ fn compare_tracks(tidal_tracks: &IndexMap<String, Track>, qobuz_tracks: &IndexMa
 fn main() {
     let tidal_mapping = build_mapping("My TIDAL Library.csv").unwrap();
     let qobuz_mapping = build_mapping("My Qobuz Library.csv").unwrap();
+
+    println!("Comparison of Favourite Artists");
+    compare_artists(&tidal_mapping.artists, &qobuz_mapping.artists);
 
     println!();
     println!("Comparison of Favourite Albums");
