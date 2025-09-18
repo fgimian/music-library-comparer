@@ -1,15 +1,71 @@
 mod models;
 
-use std::{fs::File, path::Path};
+use std::{fs::File, path::Path, process};
 
-use anyhow::Result;
+use anyhow::{Context, Result};
+use colored::Colorize as _;
 use csv::Reader;
 use indexmap::IndexMap;
 
 use crate::models::{Album, Mappings, Record, Track};
 
+fn main() {
+    if let Err(error) = run() {
+        for (index, cause) in error.chain().enumerate() {
+            if index == 0 {
+                eprintln!("{}: {cause}", "error".red());
+                continue;
+            }
+
+            if index == 1 {
+                eprintln!("{}", "caused by:".red());
+            }
+            println!("    {}: {cause}", index - 1);
+        }
+        process::exit(1);
+    }
+}
+
+fn run() -> Result<()> {
+    let tidal_mapping = build_mapping("My TIDAL Library.csv")
+        .context("unable to build a mapping of the TIDAL library")?;
+    let qobuz_mapping = build_mapping("My Qobuz Library.csv")
+        .context("unable to build a mapping of the Qobuz library")?;
+
+    println!("Comparison of Favourite Artists");
+    compare_artists(&tidal_mapping.artists, &qobuz_mapping.artists);
+
+    println!();
+    println!("Comparison of Favourite Albums");
+    compare_albums(&tidal_mapping.albums, &qobuz_mapping.albums);
+
+    println!();
+    println!("Comparison of Favourite Tracks");
+    compare_tracks(&tidal_mapping.tracks, &qobuz_mapping.tracks);
+
+    for name in tidal_mapping.playlists.keys() {
+        let Some(tidal_tracks) = tidal_mapping.playlists.get(name) else {
+            println!();
+            println!("Comparison of Playlist: {name} - Missing on TIDAL, skipping!");
+            continue;
+        };
+
+        let Some(qobuz_tracks) = qobuz_mapping.playlists.get(name) else {
+            println!();
+            println!("Comparison of Playlist: {name} - Missing on Qobuz, skipping!");
+            continue;
+        };
+
+        println!();
+        println!("Comparison of Playlist: {name}");
+        compare_tracks(tidal_tracks, qobuz_tracks);
+    }
+
+    Ok(())
+}
+
 fn build_mapping(path: impl AsRef<Path>) -> Result<Mappings> {
-    let library = File::open(path)?;
+    let library = File::open(path).context("unable to open library dump")?;
     let mut reader = Reader::from_reader(library);
 
     let mut artists = IndexMap::new();
@@ -18,7 +74,7 @@ fn build_mapping(path: impl AsRef<Path>) -> Result<Mappings> {
     let mut playlists: IndexMap<String, IndexMap<String, Track>> = IndexMap::new();
 
     for result in reader.deserialize() {
-        let record: Record = result?;
+        let record: Record = result.context("unable to parse record")?;
         let isrc = record.isrc.trim_start_matches('0').to_uppercase();
 
         if record.r#type == "Artist" {
@@ -190,39 +246,5 @@ fn compare_tracks(tidal_tracks: &IndexMap<String, Track>, qobuz_tracks: &IndexMa
                 );
             }
         }
-    }
-}
-
-fn main() {
-    let tidal_mapping = build_mapping("My TIDAL Library.csv").unwrap();
-    let qobuz_mapping = build_mapping("My Qobuz Library.csv").unwrap();
-
-    println!("Comparison of Favourite Artists");
-    compare_artists(&tidal_mapping.artists, &qobuz_mapping.artists);
-
-    println!();
-    println!("Comparison of Favourite Albums");
-    compare_albums(&tidal_mapping.albums, &qobuz_mapping.albums);
-
-    println!();
-    println!("Comparison of Favourite Tracks");
-    compare_tracks(&tidal_mapping.tracks, &qobuz_mapping.tracks);
-
-    for name in tidal_mapping.playlists.keys() {
-        let Some(tidal_tracks) = tidal_mapping.playlists.get(name) else {
-            println!();
-            println!("Comparison of Playlist: {name} - Missing on TIDAL, skipping!");
-            continue;
-        };
-
-        let Some(qobuz_tracks) = qobuz_mapping.playlists.get(name) else {
-            println!();
-            println!("Comparison of Playlist: {name} - Missing on Qobuz, skipping!");
-            continue;
-        };
-
-        println!();
-        println!("Comparison of Playlist: {name}");
-        compare_tracks(tidal_tracks, qobuz_tracks);
     }
 }
