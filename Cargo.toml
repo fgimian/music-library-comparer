@@ -7,7 +7,7 @@ keywords = ["music", "spotify", "qobuz", "tidal"]
 license = "MIT"
 readme = "README.md"
 repository = "https://github.com/fgimian/music-library-comparer"
-description = "Compares TuneMyMusic library exports for Spotify, TIDAL and Qobuz services."
+description = "Compares TuneMyMusic library exports for TIDAL and Qobuz services."
 
 [lints.clippy]
 expect_used = "warn"
