@@ -86,17 +86,17 @@ fn build_mapping(path: impl AsRef<Path>) -> Result<Mappings> {
             albums.insert(
                 isrc,
                 Album {
-                    artist: record.artist_name.to_string(),
-                    title: record.album.to_string(),
+                    artist: record.artist_name.clone(),
+                    title: record.album.clone(),
                 },
             );
         } else if record.r#type == "Favorite" {
             tracks.insert(
                 isrc,
                 Track {
-                    artist: record.artist_name.to_string(),
-                    album: record.album.to_string(),
-                    title: record.track_name.to_string(),
+                    artist: record.artist_name.clone(),
+                    album: record.album.clone(),
+                    title: record.track_name.clone(),
                 },
             );
         } else {
@@ -104,9 +104,9 @@ fn build_mapping(path: impl AsRef<Path>) -> Result<Mappings> {
             playlist.insert(
                 isrc,
                 Track {
-                    artist: record.artist_name.to_string(),
-                    album: record.album.to_string(),
-                    title: record.track_name.to_string(),
+                    artist: record.artist_name.clone(),
+                    album: record.album.clone(),
+                    title: record.track_name.clone(),
                 },
             );
         }
